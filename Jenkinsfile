@@ -15,37 +15,37 @@ pipeline {
     stages {
         stage('CreateServer') {
             steps {
-		            wrap([$class: 'BuildUser']) {
-			              ansiColor('xterm') {
-	    			            ansiblePlaybook(
-	        			        playbook: 'addhost.yml',
-	        			        vaultCredentialsId: "${BUILD_USER_ID}VaultCredentials",
-					              installation: 'ansible25',
-					              extraVars: [
-                                                                ipa_server: "${params.IPA_SERVER}",
-                                                                cred_name: "${BUILD_USER_ID}",
-                                                                server_name: "${params.SERVER_NAME}",
-                                                                flavor: "${params.FLAVOR}",
-                                                                image_name: "${params.IMAGE_NAME}",
-                                                                root_size: "${params.ROOT_SIZE}",
-                                                                data_size: "${params.DATA_SIZE}",
-                                                                ssh_key: "${params.SSH_KEY}",
-                                                                network_id: "${params.NETWORK}",
-                                                                subnet_id: "${params.SUBNET}",
-                                                                server_description: "${params.DESCRIPTION}"
-							],
-	        			    colorized: true)
-			              }
-		            }
+                wrap([$class: 'BuildUser']) {
+                    ansiColor('xterm') {
+                        ansiblePlaybook(
+                        playbook: 'addhost.yml',
+                        vaultCredentialsId: "${BUILD_USER_ID}VaultCredentials",
+                        installation: 'ansible25',
+                        extraVars: [
+                            ipa_server: "${params.IPA_SERVER}",
+                            cred_name: "${BUILD_USER_ID}",
+                            server_name: "${params.SERVER_NAME}",
+                            flavor: "${params.FLAVOR}",
+                            image_name: "${params.IMAGE_NAME}",
+                            root_size: "${params.ROOT_SIZE}",
+                            data_size: "${params.DATA_SIZE}",
+                            ssh_key: "${params.SSH_KEY}",
+                            network_id: "${params.NETWORK}",
+                            subnet_id: "${params.SUBNET}",
+                            server_description: "${params.DESCRIPTION}"
+                        ],
+                        colorized: true)
+                    }
+                }
             }
         }
         stage('Stage 2') {
             steps {
-		              wrap([$class: 'BuildUser']) {
-			            echo "${BUILD_USER}"
-			            echo "${BUILD_USER_ID}VaultCredentials"
-			            echo "${BUILD_USER_EMAIL}"
-		            }
+                  wrap([$class: 'BuildUser']) {
+                  echo "${BUILD_USER}"
+                  echo "${BUILD_USER_ID}VaultCredentials"
+                  echo "${BUILD_USER_EMAIL}"
+                  }
             }
         }
     }
