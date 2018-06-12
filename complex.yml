@@ -1,0 +1,128 @@
+heat_template_version: 2017-02-24
+
+description: Simple template to deploy a single compute instance
+
+parameters:
+  instname:
+    type: string
+    description: FQDN
+    default: "test.example.lcl"
+  ipapass:
+    type: string
+    description: OTP from ipa host add script
+    default: error
+  flavor:
+    type: string
+    description: new VM flavor
+    default: "Basic-1-4-50"
+  image_name:
+    type: string
+    description: source image for vm
+    default: "Centos-7-1805"
+  root_size:
+    type: number
+    description: size of root partition
+    default: 50
+  data_size:
+    type: number
+    description: size of partition with data
+    default: 50
+  ssh_key:
+    type: string
+    description: key is used to connect server via ssh with default user
+    default: heat_key
+  network_id:
+    type: string
+    description: id number of network
+    default: my-net1
+  subnet_id:
+    type: string
+    description: id number of subnetwork
+    default: my-subnet1
+
+resources:
+  test.instance:
+    type: OS::Nova::Server
+    properties:
+      name: {get_param: instname}
+      block_device_mapping_v2:
+      - device_name: "vda"
+        boot_index: 0
+        disk_bus: "virtio"
+        volume_id: {get_resource: test.instance.disk.a}
+        delete_on_termination: true
+      - device_name: "vdb"
+        boot_index: 1
+        disk_bus: "virtio"
+        volume_id: {get_resource: test.instance.disk.b}
+      flavor: {get_param: flavor}
+      flavor_update_policy: RESIZE
+      key_name: {get_param: ssh_key}
+      networks:
+      - port: {get_resource: test.instance.port}
+      user_data_format: SOFTWARE_CONFIG
+      user_data: {get_resource: init}
+      user_data_update_policy: IGNORE
+  test.instance.disk.a:
+    type: OS::Cinder::Volume
+    properties:
+      image: {get_param: image_name}
+      size: {get_param: root_size}
+      name:
+        list_join: ['.', [{get_param: instname}, 'a']]
+  test.instance.disk.b:
+    type: OS::Cinder::Volume
+    properties:
+      size: {get_param: data_size}
+      name:
+        list_join: ['.', [{get_param: instname}, 'b']]
+  test.instance.port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: {get_param: network_id}
+      fixed_ips:
+      - subnet_id: {get_param: subnet_id}
+  init:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+#      - config: {get_resource: disk.format}
+      - config: {get_resource: upgrade}
+      - config: {get_resource: add2ipa}
+  upgrade:
+    type: OS::Heat::CloudConfig
+    properties:
+      cloud_config:
+        package_upgrade: true
+  add2ipa:
+    type: OS::Heat::CloudConfig
+    properties:
+      cloud_config:
+        fqdn: {get_param: instname}
+        packages:
+        - epel-release
+        - ipa-client
+        - adcli
+        - certmonger
+        - oddjob-mkhomedir
+        - realmd
+        - sssd
+        runcmd:
+        - [ ipa-client-install, --mkhomedir, --force-ntpd, --ssh-trust-dns, --enable-dns-updates, --unattended, --password, {get_param: ipapass} ]
+#  disk.format:
+#    type: OS::Heat::CloudConfig
+#    properties:
+#      cloud_config:
+#        disk_setup:
+#          /dev/vdb:
+#            table_type: 'gpt'
+#            layout:
+#            - [99, 83]
+#            overwrite: false
+#        fs_setup:
+#        - label: home
+#          filesystem: 'xfs'
+#          device: '/dev/vdb1'
+#          overwrite: false
+#        mounts:
+#        - [ /dev/vdb1, /home, "xfs", "defaults", "0", "0" ]

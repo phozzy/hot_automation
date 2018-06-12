@@ -1,0 +1,12 @@
+---
+ipa_server: "dc00.example.lcl"
+server_name: "test.example.lcl"
+flavor: "Basic-1-4-50"
+image_name: "Centos-7-1805"
+root_size: 50
+data_size: 50
+ssh_key: "heat_key"
+network_id: "my-net1"
+subnet_id: "my-subnet1"
+server_description: "test server"
+...

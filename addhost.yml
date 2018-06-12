@@ -1,0 +1,50 @@
+---
+- name: Adding host to ipa-controller
+  hosts: localhost
+  vars:
+    cred_name: "cred"
+  vars_files:
+  - "vars.yml"
+  - "{{ cred_name }}.yml"
+  tasks:
+  - name: add host to ipa
+    ipa_host:
+      name: "{{ server_name }}"
+      description: "{{ server_description }}"
+      state: present
+      force: True
+      random_password: True
+      ipa_host: "{{ ipa_server }}"
+      ipa_user: "{{ ipa_user }}"
+      ipa_pass: "{{ ipa_pass }}"
+      validate_certs: False
+    register: host
+    #  - name: print result
+    #  - debug: msg="{{ host.host.randompassword }}"
+  - name: create stack
+    os_stack:
+      auth:
+        auth_url: "{{ os_auth_url }}"
+        username: "{{ os_username }}"
+        password: "{{ os_password }}"
+        project_id: "{{ os_project_id }}"
+        project_name: "{{ os_project_name }}"
+        user_domain_name: "{{ os_user_domain_name }}"
+        # identity_api_version: 3
+      interface: "public"
+      # region_name: "RegionOne"
+      name: "{{ server_name }}"
+      tag: "{{ server_name }}"
+      state: present
+      # template: "simple_yaml.yaml"
+      template: "complex.yml"
+      parameters:
+        ipapass: "{{ host.host.randompassword }}"
+        instname: "{{ server_name }}"
+        flavor: "{{ flavor }}"
+      wait: yes
+    register: stack
+  - name: print result of stack operation
+    debug:
+      var: stack
+...
