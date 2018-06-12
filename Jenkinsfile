@@ -22,9 +22,9 @@ pipeline {
 	        			        vaultCredentialsId: "${BUILD_USER_ID}VaultCredentials",
 					              installation: 'ansible25',
 					              extraVars: [
-						                ipa_server: "${params.IPA_SERVER}",
-						                cred_name: "${BUILD_USER_ID}",
-						                server_name: "${params.SERVER_NAME}",
+                                                                ipa_server: "${params.IPA_SERVER}",
+                                                                cred_name: "${BUILD_USER_ID}",
+                                                                server_name: "${params.SERVER_NAME}",
                                                                 flavor: "${params.FLAVOR}",
                                                                 image_name: "${params.IMAGE_NAME}",
                                                                 root_size: "${params.ROOT_SIZE}",
