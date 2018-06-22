@@ -79,6 +79,11 @@ resources:
   test.instance.port:
     type: OS::Neutron::Port
     properties:
+      name:
+        list_join:
+        - '.'
+        - - {get_param: instname}
+          - '0'
       network_id: {get_param: network_id}
       fixed_ips:
       - subnet_id: {get_param: subnet_id}

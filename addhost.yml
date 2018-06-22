@@ -42,6 +42,12 @@
         ipapass: "{{ host.host.randompassword }}"
         instname: "{{ server_name }}"
         flavor: "{{ flavor }}"
+        image_name: "{{ image_name }}"
+        root_size: "{{ root_size }}"
+        data_size: "{{ data_size }}"
+        ssh_key: "{{ ssh_key }}"
+        network_id: "{{ network_id }}"
+        subnet_id: "{{ subnet_id }}"
       wait: yes
     register: stack
   - name: print result of stack operation
